@@ -21,7 +21,7 @@ def __virtual__():
     Only load the module if iptables is installed
     '''
     global HAS_CHECK
-    if salt_cmd.run('iptables --help').find('--check'):
+    if '--check' in salt_cmd.run('iptables --help', output_loglevel='quiet'):
         HAS_CHECK = True
 
     if salt.utils.which('iptables'):

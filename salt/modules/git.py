@@ -211,9 +211,10 @@ def _find_ssh_exe():
     return ret
 
 
-def _git_run(command, cwd=None, user=None, password=None, identity=None,
-             ignore_retcode=False, failhard=True, redirect_stderr=False,
-             saltenv='base', output_encoding=None, **kwargs):
+def _git_run(command, cwd=None, user=None, group=None, password=None,
+             identity=None, ignore_retcode=False, failhard=True,
+             redirect_stderr=False, saltenv='base',
+             output_encoding=None, **kwargs):
     '''
     simple, throw an exception with the error message on an error return code.
 
@@ -249,10 +250,13 @@ def _git_run(command, cwd=None, user=None, password=None, identity=None,
                     __salt__['file.remove'](tmp_identity_file)
                     continue
                 else:
+                    uid = gid = -1
                     if user:
-                        os.chown(id_file,
-                                 __salt__['file.user_to_uid'](user),
-                                 -1)
+                        uid = __salt__['file.user_to_uid'](user)
+                    if group:
+                        gid = __salt__['file.group_to_gid'](group)
+                    if uid != -1 or gid != -1:
+                        os.chown(id_file, uid, gid)
             else:
                 if not __salt__['file.file_exists'](id_file):
                     missing_keys.append(id_file)
@@ -309,6 +313,7 @@ def _git_run(command, cwd=None, user=None, password=None, identity=None,
                     command,
                     cwd=cwd,
                     runas=user,
+                    group=group,
                     password=password,
                     env=env,
                     python_shell=False,
@@ -376,6 +381,7 @@ def _git_run(command, cwd=None, user=None, password=None, identity=None,
             command,
             cwd=cwd,
             runas=user,
+            group=group,
             password=password,
             env=env,
             python_shell=False,
@@ -458,6 +464,7 @@ def add(cwd,
         opts='',
         git_opts='',
         user=None,
+        group=None,
         password=None,
         ignore_retcode=False,
         output_encoding=None):
@@ -494,6 +501,10 @@ def add(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -538,6 +549,7 @@ def add(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -549,6 +561,7 @@ def archive(cwd,
             prefix=None,
             git_opts='',
             user=None,
+            group=None,
             password=None,
             ignore_retcode=False,
             output_encoding=None,
@@ -631,6 +644,10 @@ def archive(cwd,
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
 
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
+
     password
         Windows only. Required when specifying ``user``. This parameter will be
         ignored on non-Windows platforms.
@@ -689,6 +706,7 @@ def archive(cwd,
     _git_run(command,
              cwd=cwd,
              user=user,
+             group=group,
              password=password,
              ignore_retcode=ignore_retcode,
              output_encoding=output_encoding)
@@ -704,6 +722,7 @@ def branch(cwd,
            opts='',
            git_opts='',
            user=None,
+           group=None,
            password=None,
            ignore_retcode=False,
            output_encoding=None):
@@ -744,6 +763,10 @@ def branch(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -793,6 +816,7 @@ def branch(cwd,
     _git_run(command,
              cwd=cwd,
              user=user,
+             group=group,
              password=password,
              ignore_retcode=ignore_retcode,
              output_encoding=output_encoding)
@@ -805,6 +829,7 @@ def checkout(cwd,
              opts='',
              git_opts='',
              user=None,
+             group=None,
              password=None,
              ignore_retcode=False,
              output_encoding=None):
@@ -845,6 +870,10 @@ def checkout(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -904,6 +933,7 @@ def checkout(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     redirect_stderr=True,
@@ -916,6 +946,7 @@ def clone(cwd,
           opts='',
           git_opts='',
           user=None,
+          group=None,
           password=None,
           identity=None,
           https_user=None,
@@ -961,6 +992,10 @@ def clone(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -1066,6 +1101,7 @@ def clone(cwd,
     _git_run(command,
              cwd=clone_cwd,
              user=user,
+             group=group,
              password=password,
              identity=identity,
              ignore_retcode=ignore_retcode,
@@ -1079,6 +1115,7 @@ def commit(cwd,
            opts='',
            git_opts='',
            user=None,
+           group=None,
            password=None,
            filename=None,
            ignore_retcode=False,
@@ -1117,6 +1154,10 @@ def commit(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -1173,6 +1214,7 @@ def commit(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -1959,6 +2001,7 @@ def diff(cwd,
 def discard_local_changes(cwd,
                           path='.',
                           user=None,
+                          group=None,
                           password=None,
                           ignore_retcode=False,
                           output_encoding=None):
@@ -1976,6 +2019,10 @@ def discard_local_changes(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -2008,6 +2055,7 @@ def discard_local_changes(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     redirect_stderr=True,
@@ -2021,6 +2069,7 @@ def fetch(cwd,
           opts='',
           git_opts='',
           user=None,
+          group=None,
           password=None,
           identity=None,
           ignore_retcode=False,
@@ -2074,6 +2123,10 @@ def fetch(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -2157,6 +2210,7 @@ def fetch(cwd,
     output = _git_run(command,
                       cwd=cwd,
                       user=user,
+                      group=group,
                       password=password,
                       identity=identity,
                       ignore_retcode=ignore_retcode,
@@ -2199,6 +2253,7 @@ def init(cwd,
          opts='',
          git_opts='',
          user=None,
+         group=None,
          password=None,
          ignore_retcode=False,
          output_encoding=None):
@@ -2250,6 +2305,10 @@ def init(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -2311,6 +2370,7 @@ def init(cwd,
     command.append(cwd)
     return _git_run(command,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -2996,6 +3056,7 @@ def merge(cwd,
           opts='',
           git_opts='',
           user=None,
+          group=None,
           password=None,
           ignore_retcode=False,
           output_encoding=None,
@@ -3033,6 +3094,10 @@ def merge(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -3084,6 +3149,7 @@ def merge(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -3098,6 +3164,7 @@ def merge_base(cwd,
                opts='',
                git_opts='',
                user=None,
+               group=None,
                password=None,
                ignore_retcode=False,
                output_encoding=None,
@@ -3176,6 +3243,10 @@ def merge_base(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -3262,6 +3333,7 @@ def merge_base(cwd,
                                      rev=refs[0],
                                      opts=['--verify'],
                                      user=user,
+                                     group=group,
                                      password=password,
                                      ignore_retcode=ignore_retcode,
                                      output_encoding=output_encoding)
@@ -3269,6 +3341,7 @@ def merge_base(cwd,
                               refs=refs,
                               is_ancestor=False,
                               user=user,
+                              group=group,
                               password=password,
                               ignore_retcode=ignore_retcode,
                               output_encoding=output_encoding) == first_commit
@@ -3290,6 +3363,7 @@ def merge_base(cwd,
     result = _git_run(command,
                       cwd=cwd,
                       user=user,
+                      group=group,
                       password=password,
                       ignore_retcode=ignore_retcode,
                       failhard=False if is_ancestor else True,
@@ -3307,6 +3381,7 @@ def merge_tree(cwd,
                ref2,
                base=None,
                user=None,
+               group=None,
                password=None,
                ignore_retcode=False,
                output_encoding=None):
@@ -3333,6 +3408,10 @@ def merge_tree(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -3380,6 +3459,7 @@ def merge_tree(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -3389,6 +3469,7 @@ def pull(cwd,
          opts='',
          git_opts='',
          user=None,
+         group=None,
          password=None,
          identity=None,
          ignore_retcode=False,
@@ -3421,6 +3502,10 @@ def pull(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -3489,6 +3574,7 @@ def pull(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     identity=identity,
                     ignore_retcode=ignore_retcode,
@@ -3502,6 +3588,7 @@ def push(cwd,
          opts='',
          git_opts='',
          user=None,
+         group=None,
          password=None,
          identity=None,
          ignore_retcode=False,
@@ -3547,6 +3634,10 @@ def push(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -3626,6 +3717,7 @@ def push(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     identity=identity,
                     ignore_retcode=ignore_retcode,
@@ -3638,6 +3730,7 @@ def rebase(cwd,
            opts='',
            git_opts='',
            user=None,
+           group=None,
            password=None,
            ignore_retcode=False,
            output_encoding=None):
@@ -3671,6 +3764,10 @@ def rebase(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -3720,6 +3817,7 @@ def rebase(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -3943,6 +4041,7 @@ def remote_set(cwd,
                url,
                remote='origin',
                user=None,
+               group=None,
                password=None,
                https_user=None,
                https_pass=None,
@@ -3969,6 +4068,10 @@ def remote_set(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -4035,6 +4138,7 @@ def remote_set(cwd,
         _git_run(command,
                  cwd=cwd,
                  user=user,
+                 group=group,
                  password=password,
                  ignore_retcode=ignore_retcode,
                  output_encoding=output_encoding)
@@ -4050,6 +4154,7 @@ def remote_set(cwd,
     _git_run(command,
              cwd=cwd,
              user=user,
+             group=group,
              password=password,
              ignore_retcode=ignore_retcode,
              output_encoding=output_encoding)
@@ -4067,6 +4172,7 @@ def remote_set(cwd,
         _git_run(command,
                  cwd=cwd,
                  user=user,
+                 group=group,
                  password=password,
                  ignore_retcode=ignore_retcode,
                  output_encoding=output_encoding)
@@ -4173,6 +4279,7 @@ def reset(cwd,
           opts='',
           git_opts='',
           user=None,
+          group=None,
           password=None,
           ignore_retcode=False,
           output_encoding=None):
@@ -4203,6 +4310,10 @@ def reset(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -4246,6 +4357,7 @@ def reset(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -4418,6 +4530,7 @@ def rm_(cwd,
         opts='',
         git_opts='',
         user=None,
+        group=None,
         password=None,
         ignore_retcode=False,
         output_encoding=None):
@@ -4455,6 +4568,10 @@ def rm_(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -4498,6 +4615,7 @@ def rm_(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -4508,6 +4626,7 @@ def stash(cwd,
           opts='',
           git_opts='',
           user=None,
+          group=None,
           password=None,
           ignore_retcode=False,
           output_encoding=None):
@@ -4537,6 +4656,10 @@ def stash(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -4580,6 +4703,7 @@ def stash(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -4662,6 +4786,7 @@ def submodule(cwd,
               opts='',
               git_opts='',
               user=None,
+              group=None,
               password=None,
               identity=None,
               ignore_retcode=False,
@@ -4717,6 +4842,10 @@ def submodule(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -4808,6 +4937,7 @@ def submodule(cwd,
     return _git_run(cmd,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     identity=identity,
                     ignore_retcode=ignore_retcode,
@@ -4821,6 +4951,7 @@ def symbolic_ref(cwd,
                  opts='',
                  git_opts='',
                  user=None,
+                 group=None,
                  password=None,
                  ignore_retcode=False,
                  output_encoding=None):
@@ -4860,6 +4991,10 @@ def symbolic_ref(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -4914,6 +5049,7 @@ def symbolic_ref(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']
@@ -4926,6 +5062,7 @@ def tag(cwd,
         opts='',
         git_opts='',
         user=None,
+        group=None,
         password=None,
         ignore_retcode=False,
         output_encoding=None):
@@ -4972,6 +5109,10 @@ def tag(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -5023,6 +5164,7 @@ def tag(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     redirect_stderr=True,
@@ -5087,6 +5229,7 @@ def worktree_add(cwd,
                  opts='',
                  git_opts='',
                  user=None,
+                 group=None,
                  password=None,
                  ignore_retcode=False,
                  output_encoding=None,
@@ -5153,6 +5296,10 @@ def worktree_add(cwd,
     user
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
+
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -5222,6 +5369,7 @@ def worktree_add(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     redirect_stderr=True,
@@ -5235,6 +5383,7 @@ def worktree_prune(cwd,
                    opts='',
                    git_opts='',
                    user=None,
+                   group=None,
                    password=None,
                    ignore_retcode=False,
                    output_encoding=None):
@@ -5288,6 +5437,10 @@ def worktree_prune(cwd,
         User under which to run the git command. By default, the command is run
         by the user under which the minion is running.
 
+    group
+        Group under which to run the git command. By default, the command is run
+        by the user group under which the minion is running.
+
     password
         Windows only. Required when specifying ``user``. This parameter will be
         ignored on non-Windows platforms.
@@ -5337,6 +5490,7 @@ def worktree_prune(cwd,
     return _git_run(command,
                     cwd=cwd,
                     user=user,
+                    group=group,
                     password=password,
                     ignore_retcode=ignore_retcode,
                     output_encoding=output_encoding)['stdout']

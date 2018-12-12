@@ -268,6 +268,7 @@ def latest(name,
            target=None,
            branch=None,
            user=None,
+           group=None,
            password=None,
            update_head=True,
            force_checkout=False,
@@ -409,6 +410,12 @@ def latest(name,
             authentication.
 
         .. versionadded:: 0.17.0
+
+    group
+        Local system group under which to run git commands. By default, commands
+        are run by the user group of the user under which the minion is running.
+
+        .. versionadded:: Fluorine
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -670,6 +677,8 @@ def latest(name,
         branch = six.text_type(branch)
     if user is not None and not isinstance(user, six.string_types):
         user = six.text_type(user)
+    if group is not None and not isinstance(group, six.string_types):
+        group = six.text_type(group)
     if password is not None and not isinstance(password, six.string_types):
         password = six.text_type(password)
     if remote is not None and not isinstance(remote, six.string_types):
@@ -1131,6 +1140,7 @@ def latest(name,
                             refs=[base_rev, remote_rev],
                             is_ancestor=True,
                             user=user,
+                            group=group,
                             password=password,
                             ignore_retcode=True,
                             output_encoding=output_encoding)
@@ -1232,6 +1242,7 @@ def latest(name,
                                            url=name,
                                            remote=remote,
                                            user=user,
+                                           group=group,
                                            password=password,
                                            https_user=https_user,
                                            https_pass=https_pass,
@@ -1428,6 +1439,7 @@ def latest(name,
                                         tag_name,
                                         opts='-d',
                                         user=user,
+                                        group=group,
                                         password=password,
                                         output_encoding=output_encoding)
                             except CommandExecutionError as exc:
@@ -1509,6 +1521,7 @@ def latest(name,
                             refs=[base_rev, remote_rev],
                             is_ancestor=True,
                             user=user,
+                            group=group,
                             password=password,
                             output_encoding=output_encoding)
 
@@ -1556,6 +1569,7 @@ def latest(name,
                                              force=force_checkout,
                                              opts=checkout_opts,
                                              user=user,
+                                             group=group,
                                              password=password,
                                              output_encoding=output_encoding)
                     if '-b' in checkout_opts:
@@ -1576,6 +1590,7 @@ def latest(name,
                         target,
                         opts=['--hard', remote_rev],
                         user=user,
+                        group=group,
                         password=password,
                         output_encoding=output_encoding)
                     ret['changes']['forced update'] = True
@@ -1590,6 +1605,7 @@ def latest(name,
                     __salt__['git.discard_local_changes'](
                         target,
                         user=user,
+                        group=group,
                         password=password,
                         output_encoding=output_encoding)
                     comments.append('Uncommitted changes were discarded')
@@ -1599,6 +1615,7 @@ def latest(name,
                         target,
                         opts=branch_opts,
                         user=user,
+                        group=group,
                         password=password,
                         output_encoding=output_encoding)
                     comments.append(upstream_action)
@@ -1618,6 +1635,7 @@ def latest(name,
                                 'HEAD',
                                 opts=['--quiet'],
                                 user=user,
+                                group=group,
                                 password=password,
                                 ignore_retcode=True,
                                 output_encoding=output_encoding):
@@ -1640,6 +1658,7 @@ def latest(name,
                                 rev=remote_rev,
                                 opts=merge_opts,
                                 user=user,
+                                group=group,
                                 password=password,
                                 output_encoding=output_encoding)
                             comments.append(
@@ -1660,6 +1679,7 @@ def latest(name,
                             opts=['--hard',
                                   remote_rev if rev == 'HEAD' else rev],
                             user=user,
+                            group=group,
                             password=password,
                             output_encoding=output_encoding)
                         comments.append(
@@ -1676,6 +1696,7 @@ def latest(name,
                             'update',
                             opts=['--init', '--recursive'],
                             user=user,
+                            group=group,
                             password=password,
                             identity=identity,
                             saltenv=__env__,
@@ -1699,6 +1720,7 @@ def latest(name,
                         force=force_fetch,
                         refspecs=refspecs,
                         user=user,
+                        group=group,
                         password=password,
                         identity=identity,
                         saltenv=__env__,
@@ -1823,6 +1845,7 @@ def latest(name,
                 __salt__['git.clone'](target,
                                       name,
                                       user=user,
+                                      group=group,
                                       password=password,
                                       opts=clone_opts,
                                       identity=identity,
@@ -1891,6 +1914,7 @@ def latest(name,
                                 checkout_rev,
                                 opts=['-b', branch],
                                 user=user,
+                                group=group,
                                 password=password,
                                 output_encoding=output_encoding)
                             comments.append(
@@ -1927,6 +1951,7 @@ def latest(name,
                             target,
                             opts=['--hard', remote_rev],
                             user=user,
+                            group=group,
                             password=password,
                             output_encoding=output_encoding)
                         comments.append(
@@ -1996,6 +2021,7 @@ def latest(name,
                             target,
                             opts=branch_opts,
                             user=user,
+                            group=group,
                             password=password,
                             output_encoding=output_encoding)
                         comments.append(upstream_action)
@@ -2007,6 +2033,7 @@ def latest(name,
                         'update',
                         opts=['--init', '--recursive'],
                         user=user,
+                        group=group,
                         password=password,
                         identity=identity,
                         output_encoding=output_encoding)
@@ -2049,6 +2076,7 @@ def present(name,
             separate_git_dir=None,
             shared=None,
             user=None,
+            group=None,
             password=None,
             output_encoding=None):
     '''
@@ -2103,6 +2131,12 @@ def present(name,
         the user under which the minion is running.
 
         .. versionadded:: 0.17.0
+
+    group
+        Local system group under which to run git commands. By default, commands
+        are run by the user group of the user under which the minion is running.
+
+        .. versionadded:: Fluorine
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -2195,6 +2229,7 @@ def present(name,
                          separate_git_dir=separate_git_dir,
                          shared=shared,
                          user=user,
+                         group=group,
                          password=password,
                          output_encoding=output_encoding)
 
@@ -2222,6 +2257,7 @@ def detached(name,
            target=None,
            remote='origin',
            user=None,
+           group=None,
            password=None,
            force_clone=False,
            force_checkout=False,
@@ -2261,6 +2297,12 @@ def detached(name,
     user
         User under which to run git commands. By default, commands are run by
         the user under which the minion is running.
+
+    group
+        Local system group under which to run git commands. By default, commands
+        are run by the user group of the user under which the minion is running.
+
+        .. versionadded:: Fluorine
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -2336,6 +2378,7 @@ def detached(name,
 
     if not rev:
         return _fail(
+
             ret,
             '\'{0}\' is not a valid value for the \'rev\' argument'.format(rev)
         )
@@ -2359,6 +2402,8 @@ def detached(name,
             )
     if user is not None and not isinstance(user, six.string_types):
         user = six.text_type(user)
+    if group is not None and not isinstance(user, six.string_types):
+        group = six.text_type(group)
     if remote is not None and not isinstance(remote, six.string_types):
         remote = six.text_type(remote)
     if identity is not None:
@@ -2489,6 +2534,7 @@ def detached(name,
                                            url=name,
                                            remote=remote,
                                            user=user,
+                                           group=group,
                                            password=password,
                                            https_user=https_user,
                                            https_pass=https_pass,
@@ -2567,6 +2613,7 @@ def detached(name,
             __salt__['git.clone'](target,
                                   name,
                                   user=user,
+                                  group=group,
                                   password=password,
                                   opts=clone_opts,
                                   identity=identity,
@@ -2608,6 +2655,7 @@ def detached(name,
                 force=True,
                 refspecs=refspecs,
                 user=user,
+                group=group,
                 password=password,
                 identity=identity,
                 saltenv=__env__,
@@ -2676,6 +2724,7 @@ def detached(name,
             target,
             opts=['--hard', 'HEAD'],
             user=user,
+            group=group,
             password=password,
             output_encoding=output_encoding)
         comments.append(
@@ -2700,6 +2749,7 @@ def detached(name,
                                  checkout_commit_id,
                                  force=force_checkout,
                                  user=user,
+                                 group=group,
                                  password=password,
                                  output_encoding=output_encoding)
         comments.append(
@@ -2724,6 +2774,7 @@ def detached(name,
                                   'update',
                                   opts=['--init', '--recursive'],
                                   user=user,
+                                  group=group,
                                   password=password,
                                   identity=identity,
                                   output_encoding=output_encoding)
@@ -2747,6 +2798,7 @@ def cloned(name,
            target=None,
            branch=None,
            user=None,
+           group=None,
            password=None,
            identity=None,
            https_user=None,
@@ -2779,6 +2831,12 @@ def cloned(name,
     user
         User under which to run git commands. By default, commands are run by
         the user under which the minion is running.
+
+    group
+        Local system group under which to run git commands. By default, commands
+        are run by the user group of the user under which the minion is running.
+
+        .. versionadded:: Fluorine
 
     password
         Windows only. Required when specifying ``user``. This parameter will be
@@ -2863,6 +2921,7 @@ def cloned(name,
                                   name,
                                   opts=clone_opts,
                                   user=user,
+                                  group=group,
                                   password=password,
                                   identity=identity,
                                   https_user=https_user,
@@ -2926,6 +2985,7 @@ def cloned(name,
                         rev=checkout_rev,
                         opts=checkout_opts,
                         user=user,
+                        group=group,
                         password=password,
                         output_encoding=output_encoding)
                 except CommandExecutionError as exc:

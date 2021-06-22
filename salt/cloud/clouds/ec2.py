@@ -2766,7 +2766,13 @@ def create(vm_=None, call=None):
     instance = data[0]["instancesSet"]["item"]
 
     # Wait for the necessary port to become available to bootstrap
-    if ssh_interface(vm_) == "private_ips":
+    ssh_host_ip = config.get_cloud_config_value(
+        "ssh_host_ip", vm_, __opts__, default=None
+    )
+    if ssh_host_ip:
+        ip_address = ssh_host_ip
+        log.info("Salt node data. User-specific IP: %s", ip_address)
+    elif ssh_interface(vm_) == "private_ips":
         ip_address = instance["privateIpAddress"]
         log.info("Salt node data. Private_ip: %s", ip_address)
     else:

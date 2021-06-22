@@ -2780,7 +2780,13 @@ def create(vm_=None, call=None):
         log.info("Salt node data. Public_ip: %s", ip_address)
     vm_["ssh_host"] = ip_address
 
-    if salt.utils.cloud.get_salt_interface(vm_, __opts__) == "private_ips":
+    ssh_interface_ip = config.get_cloud_config_value(
+        "ssh_interface_ip", vm_, __opts__, default=None
+    )
+    if ssh_interface_ip:
+        salt_ip_address = ssh_interface_ip
+        log.info("Salt interface set to: %s", salt_ip_address)
+    elif salt.utils.cloud.get_salt_interface(vm_, __opts__) == "private_ips":
         salt_ip_address = instance["privateIpAddress"]
         log.info("Salt interface set to: %s", salt_ip_address)
     else:

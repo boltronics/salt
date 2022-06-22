@@ -1945,6 +1945,12 @@ def request_instance(vm_=None, call=None):
             raise SaltCloudConfigError("'ebs_optimized' should be a boolean value.")
         params[spot_prefix + "EbsOptimized"] = set_ebs_optimized
 
+    vm_cpu_credits = config.get_cloud_config_value(
+        "cpu_credits", vm_, __opts__, search_global=False
+    )
+    if vm_cpu_credits:
+        params[spot_prefix + "CreditSpecification.CpuCredits"] = vm_cpu_credits
+
     set_del_root_vol_on_destroy = config.get_cloud_config_value(
         "del_root_vol_on_destroy", vm_, __opts__, search_global=False
     )
